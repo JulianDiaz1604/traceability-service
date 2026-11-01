@@ -5,7 +5,7 @@ spring:
   application:
     name: traceability-service
   datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME:plazoleta_traceability}
+    url: jdbc:postgresql://localhost:5432/${DB_NAME:traceability}
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
   jpa:
