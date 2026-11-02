@@ -1,6 +1,6 @@
 # traceability-service
 
-Order status history and efficiency metrics — microservice of the **Plazoleta de comidas** challenge (PRAGMA PowerUp).
+Order status history and efficiency metrics — microservice of the **Plazoleta de comidas** challenge (PRAGMA).
 
 ## User stories
 

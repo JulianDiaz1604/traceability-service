@@ -13,5 +13,5 @@ spring:
       ddl-auto: update
     show-sql: true
 
-appDescription: "traceability-service - Plazoleta de comidas (PRAGMA PowerUp)"
+appDescription: "traceability-service - Plazoleta de comidas (PRAGMA)"
 appVersion: "1.0.0"
