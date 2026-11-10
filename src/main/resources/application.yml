@@ -4,14 +4,16 @@ server:
 spring:
   application:
     name: traceability-service
-  datasource:
-    url: jdbc:postgresql://localhost:5432/${DB_NAME:traceability}
-    username: ${DB_USERNAME:plazoleta}
-    password: ${DB_PASSWORD:plazoleta}
-  jpa:
-    hibernate:
-      ddl-auto: update
-    show-sql: true
+
+dynamodb:
+  region: ${AWS_REGION:us-east-1}
+  endpoint: ${DYNAMODB_ENDPOINT:http://localhost:8000}
+  access-key: ${AWS_ACCESS_KEY_ID:local}
+  secret-key: ${AWS_SECRET_ACCESS_KEY:local}
+  table-name: ${DYNAMODB_TABLE:order_traces}
+
+jwt:
+  secret: ${JWT_SECRET:change-me-plazoleta-shared-jwt-secret-key-32bytes-min}
 
 appDescription: "traceability-service - Plazoleta de comidas (PRAGMA)"
 appVersion: "1.0.0"

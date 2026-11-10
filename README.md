@@ -9,9 +9,10 @@ Order status history and efficiency metrics — microservice of the **Plazoleta 
 
 ## Stack
 
-Java 21 · Spring Boot 3.5.x · Gradle 8.10.x · MongoDB · MapStruct · Lombok · springdoc-openapi · JUnit 5 + Mockito.
+Java 21 · Spring Boot 3.5.x · Gradle 8.10.x · DynamoDB (AWS SDK v2 Enhanced Client) · Spring Security + JWT · MapStruct · Lombok · springdoc-openapi · JUnit 5 + Mockito.
 
-> Scaffolded from the shared JPA archetype; migrate persistence to MongoDB when implementing HU17/HU18.
+> HU17 replaced the JPA archetype with a DynamoDB persistence layer (`infrastructure/out/dynamo`).
+> For local development, run DynamoDB Local and point `DYNAMODB_ENDPOINT` at it.
 
 ## Architecture
 

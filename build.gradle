@@ -28,15 +28,26 @@ ext {
     mapstructVersion = '1.6.3'
     lombokMapstructBindingVersion = '0.2.0'
     springdocVersion = '2.8.3'
+    jjwtVersion = '0.12.6'
+    awsSdkVersion = '2.28.29'
 }
 
 dependencies {
-    implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-web'
-    developmentOnly 'org.springframework.boot:spring-boot-devtools'
+    implementation 'org.springframework.boot:spring-boot-starter-security'
+    // NOTE: spring-boot-devtools is intentionally omitted. Its RestartClassLoader is incompatible
+    // with the DynamoDB Enhanced Client's cached TableSchema (ClassCastException on the entity bean
+    // across classloaders at putItem time).
 
-    runtimeOnly 'org.postgresql:postgresql'
+    // DynamoDB (AWS SDK v2 Enhanced Client) — traceability datastore.
+    implementation platform("software.amazon.awssdk:bom:${awsSdkVersion}")
+    implementation 'software.amazon.awssdk:dynamodb-enhanced'
+
+    // JWT (JJWT) — verifies tokens issued by users-service using the shared secret.
+    implementation "io.jsonwebtoken:jjwt-api:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-impl:${jjwtVersion}"
+    runtimeOnly "io.jsonwebtoken:jjwt-jackson:${jjwtVersion}"
 
     implementation "org.mapstruct:mapstruct:${mapstructVersion}"
     compileOnly 'org.projectlombok:lombok'
@@ -47,6 +58,7 @@ dependencies {
     implementation "org.springdoc:springdoc-openapi-starter-webmvc-ui:${springdocVersion}"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
+    testImplementation 'org.springframework.security:spring-security-test'
 
     // Architecture rules as unit tests (fails the build on a boundary violation).
     testImplementation 'com.tngtech.archunit:archunit-junit5:1.4.1'

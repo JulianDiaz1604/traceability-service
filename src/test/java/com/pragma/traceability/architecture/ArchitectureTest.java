@@ -5,7 +5,6 @@ import com.tngtech.archunit.junit.AnalyzeClasses;
 import com.tngtech.archunit.junit.ArchTest;
 import com.tngtech.archunit.lang.ArchRule;
 
-import jakarta.persistence.Entity;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RestController;
@@ -20,10 +19,9 @@ import static com.tngtech.archunit.library.Architectures.layeredArchitecture;
  * Dependencies must point inward only: infrastructure -> application -> domain.
  * Production code only (tests are excluded from the analysis).
  *
- * <p>MONGODB MIGRATION NOTE (HU17/HU18): this service currently ships the JPA archetype. When the
- * datastore moves to MongoDB, update the persistence-specific rules below:
- * {@code ..infrastructure.out.jpa..} -> {@code ..infrastructure.out.mongo..},
- * {@code @Entity} -> {@code @Document}, and the {@code *JpaAdapter} suffix -> {@code *MongoAdapter}.</p>
+ * <p>Persistence is DynamoDB (AWS SDK v2 Enhanced Client): output adapters live in
+ * {@code ..infrastructure.out.dynamo..}, items are {@code *Entity} beans annotated with
+ * {@code @DynamoDbBean}, and adapters carry the {@code *DynamoAdapter} suffix.</p>
  */
 @AnalyzeClasses(
         packages = "com.pragma.traceability",
@@ -46,7 +44,6 @@ class ArchitectureTest {
 
     // --- RULE 2: Domain purity ---
     // The domain must stay framework-free so the business logic is testable and portable.
-    // On the Mongo migration, add "org.springframework.data.mongodb.." to the forbidden list.
     @ArchTest
     static final ArchRule domain_must_not_depend_on_frameworks =
             noClasses()
@@ -55,6 +52,7 @@ class ArchitectureTest {
                             "org.springframework..",
                             "jakarta.persistence..",
                             "org.hibernate..",
+                            "software.amazon.awssdk..",
                             "..infrastructure..",
                             "..application..")
                     .because("the domain is the pure core of the hexagon: no framework, no outer layer");
@@ -104,13 +102,12 @@ class ArchitectureTest {
                     .should().haveSimpleNameEndingWith("RestController")
                     .andShould().resideInAPackage("..infrastructure.input.rest..");
 
-    // JPA archetype rule — on the Mongo migration, switch @Entity to @Document and out.jpa to out.mongo.
+    // DynamoDB items live in the output adapter, named *Entity, never in the domain model.
     @ArchTest
-    static final ArchRule jpa_entities_are_named_and_placed_properly =
+    static final ArchRule dynamo_entities_are_named_and_placed_properly =
             classes()
-                    .that().areAnnotatedWith(Entity.class)
+                    .that().resideInAPackage("..infrastructure.out.dynamo.entity..")
                     .should().haveSimpleNameEndingWith("Entity")
-                    .andShould().resideInAPackage("..infrastructure.out.jpa.entity..")
                     .because("persistence entities live in the output adapter, not in the domain model");
 
     @ArchTest
@@ -120,10 +117,10 @@ class ArchitectureTest {
                     .should().haveSimpleNameEndingWith("UseCase");
 
     @ArchTest
-    static final ArchRule jpa_adapters_are_named_properly =
+    static final ArchRule dynamo_adapters_are_named_properly =
             classes()
-                    .that().resideInAPackage("..infrastructure.out.jpa.adapter..")
-                    .should().haveSimpleNameEndingWith("JpaAdapter");
+                    .that().resideInAPackage("..infrastructure.out.dynamo.adapter..")
+                    .should().haveSimpleNameEndingWith("DynamoAdapter");
 
     // --- RULE 8: Port and repository interfaces are I-prefixed ---
     // Driving (api) and driven (spi) ports, plus repositories, follow the I<Name> convention.
@@ -133,8 +130,7 @@ class ArchitectureTest {
                     .that().areInterfaces()
                     .and().resideInAnyPackage(
                             "..domain.api..",
-                            "..domain.spi..",
-                            "..infrastructure.out.jpa.repository..")
+                            "..domain.spi..")
                     .should().haveSimpleNameStartingWith("I")
                     .because("port and repository interfaces follow the I<Name> convention");
 }
