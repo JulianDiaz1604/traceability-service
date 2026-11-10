@@ -21,6 +21,7 @@ public class OrderTrace {
     private UUID id;
     private UUID orderId;
     private UUID clientId;
+    private UUID restaurantId;
     private String previousStatus;
     private String newStatus;
     private UUID employeeId;

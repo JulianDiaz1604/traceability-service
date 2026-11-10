@@ -16,8 +16,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private static final String CLIENT_ROLE = "CLIENT";
+    private static final String OWNER_ROLE = "OWNER";
     private static final String TRACES_ENDPOINT = "/api/v1/traces";
     private static final String TRACES_BY_ORDER_ENDPOINT = "/api/v1/traces/*";
+    private static final String EFFICIENCY_ENDPOINT = "/api/v1/efficiency/**";
     private static final String[] PUBLIC_ENDPOINTS = {
             "/swagger-ui/**",
             "/swagger-ui.html",
@@ -52,6 +54,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST, TRACES_ENDPOINT).authenticated()
                         // Reading an order's history is a client-only feature (HU17 criterion 2).
                         .requestMatchers(HttpMethod.GET, TRACES_BY_ORDER_ENDPOINT).hasRole(CLIENT_ROLE)
+                        // Efficiency reports are owner-only (HU18).
+                        .requestMatchers(HttpMethod.GET, EFFICIENCY_ENDPOINT).hasRole(OWNER_ROLE)
                         .anyRequest().authenticated())
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 

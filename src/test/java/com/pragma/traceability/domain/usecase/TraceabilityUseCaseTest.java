@@ -31,6 +31,7 @@ class TraceabilityUseCaseTest {
 
     private static final UUID ORDER_ID = UUID.randomUUID();
     private static final UUID CLIENT_ID = UUID.randomUUID();
+    private static final UUID RESTAURANT_ID = UUID.randomUUID();
 
     @Mock
     private ITraceabilityPersistencePort traceabilityPersistencePort;
@@ -46,6 +47,7 @@ class TraceabilityUseCaseTest {
         OrderTrace trace = new OrderTrace();
         trace.setOrderId(ORDER_ID);
         trace.setClientId(clientId);
+        trace.setRestaurantId(RESTAURANT_ID);
         trace.setNewStatus(newStatus);
         trace.setCreatedAt(createdAt);
         return trace;

@@ -12,6 +12,9 @@ dynamodb:
   secret-key: ${AWS_SECRET_ACCESS_KEY:local}
   table-name: ${DYNAMODB_TABLE:order_traces}
 
+food-court-service:
+  base-url: ${FOOD_COURT_SERVICE_URL:http://localhost:8082}
+
 jwt:
   secret: ${JWT_SECRET:change-me-plazoleta-shared-jwt-secret-key-32bytes-min}
 
