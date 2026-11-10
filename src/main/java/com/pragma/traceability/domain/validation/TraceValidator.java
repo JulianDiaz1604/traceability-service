@@ -9,6 +9,7 @@ public class TraceValidator {
         if (trace == null
                 || trace.getOrderId() == null
                 || trace.getClientId() == null
+                || trace.getRestaurantId() == null
                 || isBlank(trace.getNewStatus())) {
             throw new RequiredFieldException();
         }

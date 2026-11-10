@@ -21,6 +21,7 @@ public class OrderTraceEntity {
     private UUID id;
     private UUID orderId;
     private UUID clientId;
+    private UUID restaurantId;
     private String previousStatus;
     private String newStatus;
     private UUID employeeId;
@@ -49,6 +50,14 @@ public class OrderTraceEntity {
 
     public void setClientId(UUID clientId) {
         this.clientId = clientId;
+    }
+
+    public UUID getRestaurantId() {
+        return restaurantId;
+    }
+
+    public void setRestaurantId(UUID restaurantId) {
+        this.restaurantId = restaurantId;
     }
 
     public String getPreviousStatus() {

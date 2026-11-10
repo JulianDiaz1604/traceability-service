@@ -15,6 +15,7 @@ class TraceValidatorTest {
 
     private static final UUID ORDER_ID = UUID.randomUUID();
     private static final UUID CLIENT_ID = UUID.randomUUID();
+    private static final UUID RESTAURANT_ID = UUID.randomUUID();
 
     private TraceValidator traceValidator;
 
@@ -27,6 +28,7 @@ class TraceValidatorTest {
         OrderTrace trace = new OrderTrace();
         trace.setOrderId(orderId);
         trace.setClientId(clientId);
+        trace.setRestaurantId(RESTAURANT_ID);
         trace.setNewStatus(newStatus);
         return trace;
     }
@@ -63,6 +65,15 @@ class TraceValidatorTest {
     @DisplayName("Rejects a trace with a blank new status")
     void shouldThrowWhenNewStatusIsBlank() {
         OrderTrace trace = traceWith(ORDER_ID, CLIENT_ID, "  ");
+
+        assertThrows(RequiredFieldException.class, () -> traceValidator.validateNewTrace(trace));
+    }
+
+    @Test
+    @DisplayName("Rejects a trace without restaurant id")
+    void shouldThrowWhenRestaurantIdIsMissing() {
+        OrderTrace trace = traceWith(ORDER_ID, CLIENT_ID, "PENDING");
+        trace.setRestaurantId(null);
 
         assertThrows(RequiredFieldException.class, () -> traceValidator.validateNewTrace(trace));
     }

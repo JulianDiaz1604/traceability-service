@@ -42,3 +42,44 @@ forwarding the caller's JWT — consistent with the users/messaging integrations
 | `OrderTraceNotFoundException` | No traceability history exists for the requested order | 404 |
 | (unauthenticated request) | Authentication is required | 401 |
 | (authenticated, non-client role on read) | (Spring Security forbidden) | 403 |
+
+---
+
+## HU18 — Order efficiency (owner report)
+
+- **Role:** Owner
+- **Endpoints:**
+  - `GET /api/v1/efficiency/restaurants/{restaurantId}/orders` — per-order duration (criterion 1).
+  - `GET /api/v1/efficiency/restaurants/{restaurantId}/employees` — per-employee average ranking (criterion 2).
+- **Use case:** `EfficiencyUseCase` (`getOrderEfficiency`, `getEmployeeRanking`).
+- **Persistence:** `ITraceabilityPersistencePort.findByRestaurantId` → `OrderTraceDynamoAdapter`
+  (DynamoDB scan filtered by `restaurantId`; traces now carry `restaurantId`, sent by food-court).
+- **Cross-service port:** `IRestaurantOwnershipPort.getOwnerId` → `FoodCourtRestClientAdapter`
+  (`GET /api/v1/restaurants/{restaurantId}/owner` on food-court-service, JWT forwarded).
+
+### Business rules / invariants
+- **Efficiency metric (decided):** an order's duration is measured from **PENDING → DELIVERED**
+  (creation to delivery). Only completed (delivered) orders are included; in-progress and cancelled
+  orders are excluded.
+- **Criterion 1 — per order:** for each completed order, `{orderId, startedAt, finishedAt,
+  durationSeconds}`, sorted by `startedAt`.
+- **Criterion 2 — per employee:** average order duration grouped by the employee who handled the
+  final leg (the `employeeId` on the `DELIVERED` trace), with the completed-order count; the ranking
+  is sorted ascending (fastest average first).
+- **Ownership:** only the restaurant's owner may read its reports. The owner id comes from the JWT;
+  the real owner is resolved from food-court-service and compared → `NotRestaurantOwnerException`
+  (403) on mismatch. The persistence scan runs only after ownership passes.
+- If the restaurant does not exist in food-court, `RestaurantNotFoundException` (404). If food-court
+  is unreachable, `FoodCourtServiceUnavailableException` (502).
+
+### Exceptions
+| Exception | Message | HTTP |
+|-----------|---------|------|
+| `NotRestaurantOwnerException` | This efficiency report can only be viewed by the owner of the restaurant | 403 |
+| `RestaurantNotFoundException` | The restaurant does not exist | 404 |
+| `FoodCourtServiceUnavailableException` | The food-court service is currently unavailable; please try again later | 502 |
+| (unauthenticated request) | Authentication is required | 401 |
+| (authenticated, non-owner role) | (Spring Security forbidden) | 403 |
+
+> HU18 also extends the trace schema with `restaurantId` (food-court sends it on every transition),
+> which is what makes the per-restaurant efficiency scan possible.
